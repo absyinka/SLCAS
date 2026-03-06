@@ -1,0 +1,26 @@
+{
+  "items": [
+    {"itemID":"ITEM-0001","type":"Book","title":"Clean Code","author":"Robert C. Martin","year":2008,"category":"Software Engineering","available":true,"isbn":"978-0132350884","edition":"1st","genre":"Programming"},
+    {"itemID":"ITEM-0002","type":"Book","title":"The Pragmatic Programmer","author":"David Thomas","year":1999,"category":"Software Engineering","available":true,"isbn":"978-0201616224","edition":"1st","genre":"Programming"},
+    {"itemID":"ITEM-0003","type":"Book","title":"Introduction to Algorithms","author":"Thomas H. Cormen","year":2009,"category":"Computer Science","available":true,"isbn":"978-0262033848","edition":"3rd","genre":"Algorithms"},
+    {"itemID":"ITEM-0004","type":"Book","title":"Design Patterns","author":"Gang of Four","year":1994,"category":"Software Engineering","available":true,"isbn":"978-0201633610","edition":"1st","genre":"Architecture"},
+    {"itemID":"ITEM-0005","type":"Book","title":"The Art of Computer Programming","author":"Donald Knuth","year":1968,"category":"Computer Science","available":true,"isbn":"978-0201038040","edition":"3rd","genre":"Algorithms"},
+    {"itemID":"ITEM-0006","type":"Magazine","title":"IEEE Spectrum","author":"IEEE","year":2024,"category":"Technology","available":true,"issueNumber":61,"month":"January"},
+    {"itemID":"ITEM-0007","type":"Magazine","title":"Communications of the ACM","author":"ACM","year":2024,"category":"Computer Science","available":true,"issueNumber":67,"month":"March"},
+    {"itemID":"ITEM-0008","type":"Magazine","title":"Nature","author":"Springer","year":2023,"category":"Science","available":true,"issueNumber":623,"month":"November"},
+    {"itemID":"ITEM-0009","type":"Journal","title":"Journal of Software Engineering Research","author":"Dr. A. Kumar","year":2023,"category":"Software Engineering","available":true,"volume":15,"issueDate":"2023-06-01","peerReviewed":true},
+    {"itemID":"ITEM-0010","type":"Journal","title":"ACM Transactions on Algorithms","author":"ACM TALG","year":2022,"category":"Computer Science","available":true,"volume":18,"issueDate":"2022-09-15","peerReviewed":true},
+    {"itemID":"ITEM-0011","type":"Journal","title":"International Journal of Computer Vision","author":"D. Lowe","year":2023,"category":"Artificial Intelligence","available":true,"volume":131,"issueDate":"2023-01-10","peerReviewed":true},
+    {"itemID":"ITEM-0012","type":"Book","title":"Artificial Intelligence: A Modern Approach","author":"Stuart Russell","year":2020,"category":"Artificial Intelligence","available":true,"isbn":"978-0134610993","edition":"4th","genre":"AI"},
+    {"itemID":"ITEM-0013","type":"Book","title":"Database System Concepts","author":"Abraham Silberschatz","year":2019,"category":"Databases","available":true,"isbn":"978-0078022159","edition":"7th","genre":"Databases"},
+    {"itemID":"ITEM-0014","type":"Magazine","title":"Scientific American","author":"Springer Nature","year":2024,"category":"Science","available":true,"issueNumber":330,"month":"February"},
+    {"itemID":"ITEM-0015","type":"Journal","title":"Data Mining and Knowledge Discovery","author":"Fayyad et al.","year":2022,"category":"Data Science","available":true,"volume":36,"issueDate":"2022-03-20","peerReviewed":true}
+  ],
+  "users": [
+    {"userID":"USR-0001","name":"Alice Johnson","email":"alice@university.edu","role":"STUDENT","borrowedItemIDs":[],"borrowingHistory":[{"itemID":"ITEM-0001","itemTitle":"Clean Code","borrowDate":"2026-03-06","dueDate":"2026-03-20","returnDate":"2026-03-06"}]},
+    {"userID":"USR-0002","name":"Bob Smith","email":"bob@university.edu","role":"STUDENT","borrowedItemIDs":[],"borrowingHistory":[]},
+    {"userID":"USR-0003","name":"Dr. Carol White","email":"carol@university.edu","role":"ADMIN","borrowedItemIDs":[],"borrowingHistory":[]},
+    {"userID":"USR-0004","name":"David Brown","email":"david@university.edu","role":"STUDENT","borrowedItemIDs":[],"borrowingHistory":[]},
+    {"userID":"USR-0005","name":"Emma Wilson","email":"emma@university.edu","role":"STUDENT","borrowedItemIDs":[],"borrowingHistory":[]}
+  ]
+}
