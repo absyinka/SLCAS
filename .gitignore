@@ -1,0 +1,29 @@
+# Compiled output
+out/
+*.class
+
+# Extracted PDF text (temp file used during project setup)
+extracted.txt
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+.settings/
+.classpath
+.project
+.factorypath
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.jar
+*.war
+
+# Log files
+*.log
+
