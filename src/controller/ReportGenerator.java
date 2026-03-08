@@ -159,4 +159,27 @@ public class ReportGenerator {
         int match = items.get(index).getCategory().equalsIgnoreCase(category) ? 1 : 0;
         return match + countByCategory(items, category, index + 1);
     }
+
+    /**
+     * Generates a formatted string of all registered users.
+     */
+    public String generateUserDirectory(LibraryDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- LIBRARY USER DIRECTORY ---\n\n");
+        sb.append(String.format("%-10s | %-20s | %-15s\n", "ID", "Name", "Role"));
+        sb.append("----------------------------------------------------------\n");
+
+        for (UserAccount user : db.getUserAccounts()) {
+            sb.append(String.format("%-10s | %-20s | %-15s\n",
+                    user.getUserID(),
+                    user.getName(),
+                    user.getRole()));
+        }
+
+        if (db.getUserAccounts().isEmpty()) {
+            sb.append("No users registered in the system.");
+        }
+
+        return sb.toString();
+    }
 }

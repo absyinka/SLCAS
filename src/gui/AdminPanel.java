@@ -1,8 +1,7 @@
 package gui;
 
 import controller.LibraryManager;
-import model.*;
-import utils.IDGenerator;
+import model.UserAccount;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -11,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Tab 2 — Admin Operations.
@@ -71,8 +71,6 @@ public class AdminPanel extends JPanel {
         updateDynamicFields();
     }
 
-    // ── Layout ────────────────────────────────────────────────────────────────
-
     private void buildUI() {
         add(buildAddItemSection());
         add(Box.createVerticalStrut(8));
@@ -90,37 +88,30 @@ public class AdminPanel extends JPanel {
         JPanel panel = titledPanel("Add Library Item");
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        // Row 1: type selector
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         row1.add(new JLabel("Type:"));
-        typeCombo.setToolTipText("Select item type — fields will change dynamically");
         typeCombo.addActionListener(e -> updateDynamicFields());
         row1.add(typeCombo);
         panel.add(row1);
 
-        // Row 2: common fields
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
-        row2.add(new JLabel("Title:"));      titleField.setToolTipText("Item title");    row2.add(titleField);
-        row2.add(new JLabel("Author:"));     authorField.setToolTipText("Author/Publisher"); row2.add(authorField);
-        row2.add(new JLabel("Year:"));       yearField.setToolTipText("Publication year (4 digits)"); row2.add(yearField);
-        row2.add(new JLabel("Category:"));   categoryField.setToolTipText("Genre / subject area"); row2.add(categoryField);
+        row2.add(new JLabel("Title:"));      row2.add(titleField);
+        row2.add(new JLabel("Author:"));     row2.add(authorField);
+        row2.add(new JLabel("Year:"));       row2.add(yearField);
+        row2.add(new JLabel("Category:"));   row2.add(categoryField);
         panel.add(row2);
 
-        // Row 3: dynamic extra fields
         panel.add(bookExtra);
         panel.add(magExtra);
         panel.add(journalExtra);
 
-        // Row 4: buttons
         JPanel row4 = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
         JButton addBtn = new JButton("Add Item");
         addBtn.setBackground(new Color(30, 100, 180));
         addBtn.setForeground(Color.WHITE);
-        addBtn.setToolTipText("Add this item to the library catalogue");
         addBtn.addActionListener(e -> doAddItem());
 
         JButton clearBtn = new JButton("Clear");
-        clearBtn.setToolTipText("Clear the form");
         clearBtn.addActionListener(e -> clearAddForm());
 
         row4.add(addBtn);
@@ -131,19 +122,16 @@ public class AdminPanel extends JPanel {
     }
 
     private void buildExtraFields() {
-        // Book extra
-        bookExtra.add(new JLabel("ISBN:"));       isbnField.setToolTipText("ISBN number");    bookExtra.add(isbnField);
-        bookExtra.add(new JLabel("Edition:"));    editionField.setToolTipText("Edition");      bookExtra.add(editionField);
-        bookExtra.add(new JLabel("Genre:"));      genreField.setToolTipText("Book genre");     bookExtra.add(genreField);
+        bookExtra.add(new JLabel("ISBN:"));       bookExtra.add(isbnField);
+        bookExtra.add(new JLabel("Edition:"));    bookExtra.add(editionField);
+        bookExtra.add(new JLabel("Genre:"));      bookExtra.add(genreField);
 
-        // Magazine extra
-        magExtra.add(new JLabel("Issue #:"));    issueNumField.setToolTipText("Issue number"); magExtra.add(issueNumField);
-        magExtra.add(new JLabel("Month:"));       monthField.setToolTipText("Publication month"); magExtra.add(monthField);
+        magExtra.add(new JLabel("Issue #:"));    magExtra.add(issueNumField);
+        magExtra.add(new JLabel("Month:"));       magExtra.add(monthField);
 
-        // Journal extra
-        journalExtra.add(new JLabel("Volume:")); volumeField.setToolTipText("Volume number"); journalExtra.add(volumeField);
-        journalExtra.add(new JLabel("Date:"));   issueDateField.setToolTipText("Issue date"); journalExtra.add(issueDateField);
-        journalExtra.add(peerReviewedCb);        peerReviewedCb.setToolTipText("Tick if peer-reviewed");
+        journalExtra.add(new JLabel("Volume:")); journalExtra.add(volumeField);
+        journalExtra.add(new JLabel("Date:"));   journalExtra.add(issueDateField);
+        journalExtra.add(peerReviewedCb);
     }
 
     private JPanel buildDeleteUndoSection() {
@@ -151,20 +139,17 @@ public class AdminPanel extends JPanel {
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 6));
 
         panel.add(new JLabel("Item ID to delete:"));
-        deleteIdField.setToolTipText("Enter the exact item ID to remove");
         panel.add(deleteIdField);
 
         JButton deleteBtn = new JButton("Delete");
         deleteBtn.setForeground(Color.WHITE);
         deleteBtn.setBackground(new Color(190, 30, 30));
-        deleteBtn.setToolTipText("Permanently remove item (can be undone)");
         deleteBtn.addActionListener(e -> doDelete());
         panel.add(deleteBtn);
 
         panel.add(Box.createHorizontalStrut(24));
 
         JButton undoBtn = new JButton("↩  Undo Last Action");
-        undoBtn.setToolTipText("Reverse the last Add or Delete operation");
         undoBtn.addActionListener(e -> doUndo());
         panel.add(undoBtn);
 
@@ -175,12 +160,11 @@ public class AdminPanel extends JPanel {
         JPanel panel = titledPanel("Register New User");
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 6));
 
-        panel.add(new JLabel("Name:"));  userNameField.setToolTipText("Full name");  panel.add(userNameField);
-        panel.add(new JLabel("Email:")); userEmailField.setToolTipText("Email address"); panel.add(userEmailField);
+        panel.add(new JLabel("Name:"));  panel.add(userNameField);
+        panel.add(new JLabel("Email:")); panel.add(userEmailField);
         panel.add(new JLabel("Role:"));  panel.add(userRoleCb);
 
         JButton addUserBtn = new JButton("Register");
-        addUserBtn.setToolTipText("Create a new user account");
         addUserBtn.addActionListener(e -> doAddUser());
         panel.add(addUserBtn);
 
@@ -192,26 +176,28 @@ public class AdminPanel extends JPanel {
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 6));
 
         JButton mostBorrowedBtn = new JButton("Most Borrowed");
-        mostBorrowedBtn.setToolTipText("Items ranked by borrow frequency");
         mostBorrowedBtn.addActionListener(e ->
                 showReport("Most Borrowed Items",
                         manager.getReportGenerator().getMostBorrowedReport()));
 
         JButton overdueBtn = new JButton("Overdue Users");
-        overdueBtn.setToolTipText("Users who have overdue items");
         overdueBtn.addActionListener(e ->
                 showReport("Users with Overdue Items",
                         manager.getReportGenerator().getOverdueUsersReport()));
 
         JButton categoryBtn = new JButton("Category Distribution");
-        categoryBtn.setToolTipText("Item counts by type and subject category");
         categoryBtn.addActionListener(e ->
                 showReport("Category Distribution",
                         manager.getReportGenerator().getCategoryReport()));
 
+        // Updated: Added User Directory Button
+        JButton userDirBtn = new JButton("View User Directory");
+        userDirBtn.addActionListener(e -> showUserDirectory());
+
         panel.add(mostBorrowedBtn);
         panel.add(overdueBtn);
         panel.add(categoryBtn);
+        panel.add(userDirBtn);
         return panel;
     }
 
@@ -220,11 +206,9 @@ public class AdminPanel extends JPanel {
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 6));
 
         JButton importBtn = new JButton("Import CSV…");
-        importBtn.setToolTipText("Bulk-add items from a CSV file");
         importBtn.addActionListener(e -> doImportCSV());
 
         JButton exportBtn = new JButton("Export CSV…");
-        exportBtn.setToolTipText("Export the current catalogue to CSV");
         exportBtn.addActionListener(e -> doExportCSV());
 
         panel.add(importBtn);
@@ -232,9 +216,6 @@ public class AdminPanel extends JPanel {
         return panel;
     }
 
-    // ── Dynamic form fields ───────────────────────────────────────────────────
-
-    /** Shows/hides the type-specific extra fields based on the type combo selection. */
     private void updateDynamicFields() {
         String type = (String) typeCombo.getSelectedItem();
         bookExtra.setVisible("Book".equals(type));
@@ -244,8 +225,6 @@ public class AdminPanel extends JPanel {
         repaint();
     }
 
-    // ── Actions ───────────────────────────────────────────────────────────────
-
     private void doAddItem() {
         String title    = titleField.getText().trim();
         String author   = authorField.getText().trim();
@@ -253,7 +232,6 @@ public class AdminPanel extends JPanel {
         String category = categoryField.getText().trim();
         String type     = (String) typeCombo.getSelectedItem();
 
-        // Input validation
         if (title.isEmpty() || author.isEmpty() || yearStr.isEmpty() || category.isEmpty()) {
             showError("Title, Author, Year, and Category are required.");
             return;
@@ -261,72 +239,43 @@ public class AdminPanel extends JPanel {
         int year;
         try {
             year = Integer.parseInt(yearStr);
-            if (year < 1000 || year > 9999) throw new NumberFormatException();
         } catch (NumberFormatException ex) {
-            showError("Year must be a valid 4-digit number.");
+            showError("Year must be a valid number.");
             return;
         }
 
         try {
-            switch (type) {
-                case "Book":
-                    manager.addBook(title, author, year, category,
-                            isbnField.getText().trim(),
-                            editionField.getText().trim(),
-                            genreField.getText().trim());
-                    break;
-                case "Magazine":
-                    int issueNum = parseIntField(issueNumField.getText().trim(), "Issue #");
-                    manager.addMagazine(title, author, year, category,
-                            issueNum, monthField.getText().trim());
-                    break;
-                case "Journal":
-                    int volume = parseIntField(volumeField.getText().trim(), "Volume");
-                    manager.addJournal(title, author, year, category,
-                            volume, issueDateField.getText().trim(),
-                            peerReviewedCb.isSelected());
-                    break;
+            switch (Objects.requireNonNull(type)) {
+                case "Book" -> manager.addBook(title, author, year, category,
+                        isbnField.getText().trim(), editionField.getText().trim(), genreField.getText().trim());
+                case "Magazine" -> manager.addMagazine(title, author, year, category,
+                        parseIntField(issueNumField.getText().trim(), "Issue #"), monthField.getText().trim());
+                case "Journal" -> manager.addJournal(title, author, year, category,
+                        parseIntField(volumeField.getText().trim(), "Volume"), issueDateField.getText().trim(), peerReviewedCb.isSelected());
             }
-            mainWindow.setStatus(type + " added: \"" + title + "\"");
             mainWindow.refreshCatalogue();
             clearAddForm();
-            JOptionPane.showMessageDialog(this,
-                    type + " \"" + title + "\" added to the catalogue.",
-                    "Item Added", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            showError(ex.getMessage());
-        }
+            JOptionPane.showMessageDialog(this, type + " added successfully.");
+        } catch (Exception ex) { showError(ex.getMessage()); }
     }
 
     private void doDelete() {
         String id = deleteIdField.getText().trim();
         if (id.isEmpty()) { showError("Please enter an Item ID."); return; }
-
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Delete item " + id + "? This can be undone via Undo.",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm != JOptionPane.YES_OPTION) return;
-
         try {
             manager.deleteItem(id);
-            deleteIdField.setText("");
-            mainWindow.setStatus("Deleted item: " + id);
             mainWindow.refreshCatalogue();
-        } catch (Exception ex) {
-            showError(ex.getMessage());
-        }
+            deleteIdField.setText("");
+        } catch (Exception ex) { showError(ex.getMessage()); }
     }
 
     private void doUndo() {
         String result = manager.undoLastAction();
-        if (result == null) {
-            JOptionPane.showMessageDialog(this, "Nothing to undo.", "Undo",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            mainWindow.setStatus(result);
+        if (result != null) {
             mainWindow.refreshCatalogue();
-            JOptionPane.showMessageDialog(this, result, "Undo Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, result);
+        } else {
+            JOptionPane.showMessageDialog(this, "Nothing to undo.");
         }
     }
 
@@ -343,21 +292,13 @@ public class AdminPanel extends JPanel {
             UserAccount user = manager.addUser(name, email, UserAccount.Role.valueOf(role));
             userNameField.setText("");
             userEmailField.setText("");
-            mainWindow.setStatus("User registered: " + user.getUserID() + " — " + name);
-            JOptionPane.showMessageDialog(this,
-                    "User registered!\nID: " + user.getUserID() + "\nName: " + name,
-                    "User Added", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            showError(ex.getMessage());
-        }
+            JOptionPane.showMessageDialog(this, "User registered: " + user.getUserID());
+        } catch (Exception ex) { showError(ex.getMessage()); }
     }
-
-    // ── Reports ───────────────────────────────────────────────────────────────
 
     private void showReport(String title, List<String[]> data) {
         if (data.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No data available.", title,
-                    JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No data available.", title, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
         String[] headers = data.get(0);
@@ -368,70 +309,42 @@ public class AdminPanel extends JPanel {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable reportTable = new JTable(model);
-        reportTable.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        reportTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
-        reportTable.setRowHeight(22);
-
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
-                title, true);
-        dialog.setLayout(new BorderLayout());
-        dialog.add(new JScrollPane(reportTable), BorderLayout.CENTER);
-
-        JButton closeBtn = new JButton("Close");
-        closeBtn.addActionListener(e -> dialog.dispose());
-        JPanel south = new JPanel();
-        south.add(closeBtn);
-        dialog.add(south, BorderLayout.SOUTH);
-
-        dialog.setSize(620, 380);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), title, true);
+        dialog.add(new JScrollPane(reportTable));
+        dialog.setSize(600, 400);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
 
-    // ── CSV Import / Export (also called from MainWindow menu) ────────────────
+    // New Helper: showUserDirectory
+    private void showUserDirectory() {
+        String directory = manager.getReportGenerator().generateUserDirectory(manager.getDatabase());
+        JTextArea textArea = new JTextArea(directory);
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(500, 400));
+        JOptionPane.showMessageDialog(this, scrollPane, "User Directory", JOptionPane.PLAIN_MESSAGE);
+    }
 
     public void doImportCSV() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new FileNameExtensionFilter("CSV Files (*.csv)", "csv"));
-        chooser.setDialogTitle("Import Items from CSV");
-        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
-
-        File file = chooser.getSelectedFile();
-        try {
-            int count = manager.getFileHandler()
-                    .importCSV(file.getAbsolutePath(), manager.getDatabase());
-            mainWindow.setStatus("Imported " + count + " item(s) from " + file.getName());
-            mainWindow.refreshCatalogue();
-            JOptionPane.showMessageDialog(this,
-                    count + " item(s) imported successfully.", "Import Complete",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            showError("Import failed: " + ex.getMessage());
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                manager.getFileHandler().importCSV(chooser.getSelectedFile().getAbsolutePath(), manager.getDatabase());
+                mainWindow.refreshCatalogue();
+            } catch (Exception ex) { showError(ex.getMessage()); }
         }
     }
 
     public void doExportCSV() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new FileNameExtensionFilter("CSV Files (*.csv)", "csv"));
-        chooser.setDialogTitle("Export Catalogue to CSV");
-        chooser.setSelectedFile(new File("library_export.csv"));
-        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-
-        File file = chooser.getSelectedFile();
-        String path = file.getAbsolutePath();
-        if (!path.endsWith(".csv")) path += ".csv";
-        try {
-            manager.getFileHandler().exportCSV(path, manager.getDatabase());
-            mainWindow.setStatus("Exported catalogue to " + file.getName());
-            JOptionPane.showMessageDialog(this,
-                    "Catalogue exported to:\n" + path, "Export Complete",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            showError("Export failed: " + ex.getMessage());
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                manager.getFileHandler().exportCSV(chooser.getSelectedFile().getAbsolutePath(), manager.getDatabase());
+            } catch (Exception ex) { showError(ex.getMessage()); }
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void clearAddForm() {
         titleField.setText(""); authorField.setText(""); yearField.setText("");
@@ -446,18 +359,14 @@ public class AdminPanel extends JPanel {
     }
 
     private int parseIntField(String value, String fieldName) {
-        if (value.isEmpty()) return 0;
         try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { throw new IllegalArgumentException(fieldName + " must be a number."); }
+        catch (Exception e) { throw new IllegalArgumentException(fieldName + " must be a number."); }
     }
 
     private JPanel titledPanel(String title) {
         JPanel p = new JPanel();
-        p.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), title,
-                TitledBorder.LEFT, TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 12)));
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, p.getPreferredSize().height + 80));
+        p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, TitledBorder.LEFT, TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 12)));
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, p.getPreferredSize().height + 50));
         return p;
     }
 }
