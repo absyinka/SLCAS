@@ -27,6 +27,7 @@ public class MainWindow extends JFrame {
     private BorrowPanel      borrowPanel;
     private AdminPanel       adminPanel;
     private SearchSortPanel  searchSortPanel;
+    private ActiveBorrowsPanel activeBorrowsPanel;
 
     public MainWindow(LibraryManager manager) {
         this.manager = manager;
@@ -51,20 +52,24 @@ public class MainWindow extends JFrame {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
-        viewItemsPanel  = new ViewItemsPanel(manager, this);
-        borrowPanel     = new BorrowPanel(manager, this);
-        adminPanel      = new AdminPanel(manager, this);
-        searchSortPanel = new SearchSortPanel(manager, this);
+        viewItemsPanel     = new ViewItemsPanel(manager, this);
+        borrowPanel        = new BorrowPanel(manager, this);
+        adminPanel         = new AdminPanel(manager, this);
+        searchSortPanel    = new SearchSortPanel(manager, this);
+        activeBorrowsPanel = new ActiveBorrowsPanel(manager);
 
-        tabs.addTab("📚  View Items",    viewItemsPanel);
+        tabs.addTab("📚  View Items",      viewItemsPanel);
         tabs.addTab("🔄  Borrow / Return", borrowPanel);
-        tabs.addTab("🛠  Admin",          adminPanel);
-        tabs.addTab("🔍  Search & Sort",  searchSortPanel);
+        tabs.addTab("🛠  Admin",           adminPanel);
+        tabs.addTab("🔍  Search & Sort",   searchSortPanel);
+        tabs.addTab("📋  Active Borrows",  activeBorrowsPanel);
 
-        // Refresh ViewItems whenever the user switches to that tab
+        // Refresh panels whenever the user switches to them
         tabs.addChangeListener(e -> {
             if (tabs.getSelectedComponent() == viewItemsPanel) {
                 viewItemsPanel.refresh();
+            } else if (tabs.getSelectedComponent() == activeBorrowsPanel) {
+                activeBorrowsPanel.refresh();
             }
         });
 
@@ -157,6 +162,7 @@ public class MainWindow extends JFrame {
 
     public void refreshCatalogue() {
         viewItemsPanel.refresh();
+        activeBorrowsPanel.refresh();
     }
 
     // ── Exit ──────────────────────────────────────────────────────────────────

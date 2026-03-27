@@ -14,6 +14,7 @@ Developed for **COS 202 — MIVA Open University, 2025**.
 | **Search** | Search by title, author, or type using linear, binary, or recursive search |
 | **Sorting** | Sort by title, author, or year using Selection, Insertion, Merge, or Quick Sort |
 | **Fines** | Automatic overdue fine computation ($0.50/day, recursive accumulation) |
+| **Active Borrows** | Live view of all currently borrowed items showing who holds each item, borrow/due dates, and overdue status |
 | **Reports** | Most borrowed items; users with overdue items; category distribution |
 | **Persistence** | Automatic JSON save/load on startup and shutdown; no database required |
 | **Import/Export** | Bulk import items from CSV; export full catalogue to CSV |
@@ -33,19 +34,14 @@ Developed for **COS 202 — MIVA Open University, 2025**.
 
 From the project root directory:
 
+**Bash / Git Bash:**
 ```bash
-# Create the output directory (first time only)
-mkdir -p out
-
-# Compile all source files
-javac -d out -sourcepath src $(find src -name "*.java" | tr '\n' ' ')
+javac -d out -sourcepath src $(find src -name "*.java")
 ```
 
-On Windows Command Prompt (if not using bash):
-
-```cmd
-for /R src %f in (*.java) do set FILES=%FILES% %f
-javac -d out %FILES%
+**PowerShell:**
+```powershell
+javac -d out -sourcepath src (Get-ChildItem -Path src -Recurse -Filter "*.java" | Select-Object -ExpandProperty FullName)
 ```
 
 ---
@@ -106,7 +102,8 @@ SLCAS/
 │       ├── ViewItemsPanel.java    ← browse catalogue (Tab 1)
 │       ├── BorrowPanel.java       ← borrow & return (Tab 2)
 │       ├── AdminPanel.java        ← admin operations (Tab 3)
-│       └── SearchSortPanel.java   ← search & sort (Tab 4)
+│       ├── SearchSortPanel.java   ← search & sort (Tab 4)
+│       └── ActiveBorrowsPanel.java ← live borrowed items view (Tab 5)
 │
 ├── data/
 │   └── library_data.json          ← persistence file (auto-created on save)
@@ -122,7 +119,7 @@ SLCAS/
 Browse the full catalogue with type filtering (All / Book / Magazine / Journal). Unavailable (borrowed) items are highlighted in red. Double-click any row to view the full item details.
 
 ### Tab 2 — Borrow / Return
-Enter a **User ID** and **Item ID** to borrow or return an item. If an item is already borrowed, the user is automatically added to the reservation waitlist. When an item is returned, it is auto-assigned to the next user in the queue.
+Select a **borrower** and an **item** from the dropdown menus to borrow or return an item. If an item is already borrowed, the user is automatically added to the reservation waitlist. When an item is returned, it is auto-assigned to the next user in the queue. Dropdowns refresh automatically after each transaction.
 
 ### Tab 3 — Admin
 - **Add Item** — form with dynamic fields (fields change based on type selection)
@@ -133,6 +130,9 @@ Enter a **User ID** and **Item ID** to borrow or return an item. If an item is a
 
 ### Tab 4 — Search & Sort
 Search the catalogue by title, author, or type. Sort by title, author, or year using any of the four algorithms. The search engine automatically uses binary search after a sort is applied.
+
+### Tab 5 — Active Borrows
+A live table of every item currently on loan. Columns: Borrower, User ID, Item Title, Item ID, Type, Borrow Date, Due Date, and Status. Overdue rows are highlighted in red with the number of days overdue. Refreshes automatically when switching to the tab or after any borrow/return action.
 
 ---
 
@@ -155,31 +155,15 @@ Data is stored in `data/library_data.json`. The format is:
 ```json
 {
   "items": [
-    {
-      "itemID": "ITEM-0001",
-      "type": "Book",
-      "title": "Clean Code",
-      "author": "Robert C. Martin",
-      "year": 2008,
-      "category": "Software Engineering",
-      "available": true,
-      "isbn": "978-0132350884",
-      "edition": "1st",
-      "genre": "Programming"
-    }
+    {"itemID":"ITEM-0001","type":"Book","title":"Clean Code","author":"Robert C. Martin","year":2008,"category":"Software Engineering","available":true,"isbn":"978-0132350884","edition":"1st","genre":"Programming"}
   ],
   "users": [
-    {
-      "userID": "USR-0001",
-      "name": "Alice Johnson",
-      "email": "alice@university.edu",
-      "role": "STUDENT",
-      "borrowedItemIDs": [],
-      "borrowingHistory": []
-    }
+    {"userID":"USR-0001","name":"Alice Johnson","email":"alice@university.edu","role":"STUDENT","borrowedItemIDs":[],"borrowingHistory":[]}
   ]
 }
 ```
+
+> **Important:** The file uses compact JSON (no spaces after `:` or `,`). Do not manually reformat it with a text editor — the built-in parser expects exactly this format. Always edit data through the application (Save, Import CSV).
 
 The file is loaded at startup and saved when:
 - The user selects **File → Save** (`Ctrl+S`)
@@ -248,7 +232,7 @@ Item IDs range from `ITEM-0001` to `ITEM-0015`. Use these to test borrow and ret
 | Quick sort | `SortingUtils.quickSort()` _(recursive)_ |
 | Recursive component | 5 total (merge sort, quick sort, search, category count, fine) |
 | Event-driven GUI | All panels use `ActionListener`, `MouseListener`, `ChangeListener` |
-| Tabbed panels | 4 tabs in `MainWindow` |
+| Tabbed panels | 5 tabs in `MainWindow` |
 | Timer | 60-second overdue notification in `MainWindow` |
 | File persistence | JSON via `FileHandler` |
 | Custom exceptions | 5 exception classes in `exceptions/` |

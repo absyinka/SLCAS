@@ -3,17 +3,22 @@ package gui;
 import controller.BorrowController.BorrowResult;
 import controller.BorrowController.ReturnResult;
 import controller.LibraryManager;
+import model.LibraryItem;
+import model.UserAccount;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tab 1 — Borrow & Return.
  *
  * Layout: GridBagLayout
  * Two titled sections: Borrow and Return.
- * Each has User ID + Item ID text fields and a submit button.
+ * Each has User ID + Item ID dropdown selectors and a submit button.
  */
 public class BorrowPanel extends JPanel {
 
@@ -21,19 +26,24 @@ public class BorrowPanel extends JPanel {
     private final MainWindow     mainWindow;
 
     // Borrow fields
-    private final JTextField borrowUserField = new JTextField(15);
-    private final JTextField borrowItemField = new JTextField(15);
-    private final JLabel     borrowStatus   = new JLabel(" ");
+    private final JComboBox<String> borrowUserCombo = new JComboBox<>();
+    private final JComboBox<String> borrowItemCombo = new JComboBox<>();
+    private final JLabel            borrowStatus    = new JLabel(" ");
+    private final Map<String, String> userIdMap     = new HashMap<>(); // name → ID
+    private final Map<String, String> itemIdMap     = new HashMap<>(); // title → ID
 
     // Return fields
-    private final JTextField returnUserField = new JTextField(15);
-    private final JTextField returnItemField = new JTextField(15);
-    private final JLabel     returnStatus   = new JLabel(" ");
+    private final JComboBox<String> returnUserCombo = new JComboBox<>();
+    private final JComboBox<String> returnItemCombo = new JComboBox<>();
+    private final JLabel            returnStatus    = new JLabel(" ");
+    private final Map<String, String> returnUserIdMap = new HashMap<>(); // name → ID
+    private final Map<String, String> returnItemIdMap = new HashMap<>(); // title → ID
 
     public BorrowPanel(LibraryManager manager, MainWindow mainWindow) {
         this.manager    = manager;
         this.mainWindow = mainWindow;
         setLayout(new GridBagLayout());
+        populateDropdowns();
         buildUI();
     }
 
@@ -67,8 +77,8 @@ public class BorrowPanel extends JPanel {
 
         GridBagConstraints g = formGbc();
 
-        addFormRow(panel, g, 0, "User ID:", borrowUserField, "Enter the borrower's user ID (e.g. USR-0001)");
-        addFormRow(panel, g, 1, "Item ID:", borrowItemField, "Enter the item ID to borrow (e.g. ITEM-0001)");
+        addFormRow(panel, g, 0, "Borrower Name:", borrowUserCombo, "Select the borrower's name");
+        addFormRow(panel, g, 1, "Item Name:", borrowItemCombo, "Select the item to borrow");
 
         JButton borrowBtn = new JButton("Borrow");
         borrowBtn.setBackground(new Color(30, 100, 180));
@@ -96,8 +106,8 @@ public class BorrowPanel extends JPanel {
 
         GridBagConstraints g = formGbc();
 
-        addFormRow(panel, g, 0, "User ID:", returnUserField, "Enter the user ID returning the item");
-        addFormRow(panel, g, 1, "Item ID:", returnItemField, "Enter the item ID being returned");
+        addFormRow(panel, g, 0, "Borrower Name:", returnUserCombo, "Select the user returning the item");
+        addFormRow(panel, g, 1, "Item Name:", returnItemCombo, "Select the item being returned");
 
         JButton returnBtn = new JButton("Return");
         returnBtn.setBackground(new Color(0, 140, 70));
@@ -119,13 +129,16 @@ public class BorrowPanel extends JPanel {
     // ── Actions ───────────────────────────────────────────────────────────────
 
     private void doBorrow() {
-        String uid = borrowUserField.getText().trim();
-        String iid = borrowItemField.getText().trim();
+        String selectedUser = (String) borrowUserCombo.getSelectedItem();
+        String selectedItem = (String) borrowItemCombo.getSelectedItem();
 
-        if (uid.isEmpty() || iid.isEmpty()) {
-            showError("Please enter both User ID and Item ID.");
+        if (selectedUser == null || selectedItem == null || userIdMap.isEmpty() || itemIdMap.isEmpty()) {
+            showError("Please select both a borrower and an item.");
             return;
         }
+
+        String uid = userIdMap.get(selectedUser);
+        String iid = itemIdMap.get(selectedItem);
 
         BorrowResult result = manager.getBorrowController().borrowItem(uid, iid);
         switch (result) {
@@ -134,13 +147,16 @@ public class BorrowPanel extends JPanel {
                 borrowStatus.setText("✔  Item borrowed successfully.");
                 mainWindow.setStatus("Borrowed: " + iid + " → " + uid);
                 mainWindow.refreshCatalogue();
-                clearBorrowFields();
+                refreshDropdowns();
+                borrowUserCombo.setSelectedIndex(0);
+                borrowItemCombo.setSelectedIndex(0);
                 break;
             case QUEUED:
                 borrowStatus.setForeground(new Color(200, 120, 0));
                 borrowStatus.setText("⏳  Item unavailable — added to waitlist.");
                 mainWindow.setStatus("Queued: " + uid + " is waiting for " + iid);
-                clearBorrowFields();
+                borrowUserCombo.setSelectedIndex(0);
+                borrowItemCombo.setSelectedIndex(0);
                 break;
             case USER_NOT_FOUND:
                 borrowStatus.setForeground(Color.RED);
@@ -154,13 +170,16 @@ public class BorrowPanel extends JPanel {
     }
 
     private void doReturn() {
-        String uid = returnUserField.getText().trim();
-        String iid = returnItemField.getText().trim();
+        String selectedUser = (String) returnUserCombo.getSelectedItem();
+        String selectedItem = (String) returnItemCombo.getSelectedItem();
 
-        if (uid.isEmpty() || iid.isEmpty()) {
-            showError("Please enter both User ID and Item ID.");
+        if (selectedUser == null || selectedItem == null || returnUserIdMap.isEmpty() || returnItemIdMap.isEmpty()) {
+            showError("Please select both a borrower and an item.");
             return;
         }
+
+        String uid = returnUserIdMap.get(selectedUser);
+        String iid = returnItemIdMap.get(selectedItem);
 
         ReturnResult result = manager.getBorrowController().returnItem(uid, iid);
         switch (result) {
@@ -176,7 +195,9 @@ public class BorrowPanel extends JPanel {
                 }
                 mainWindow.setStatus("Returned: " + iid + " from " + uid);
                 mainWindow.refreshCatalogue();
-                clearReturnFields();
+                refreshDropdowns();
+                returnUserCombo.setSelectedIndex(0);
+                returnItemCombo.setSelectedIndex(0);
                 break;
             case NOT_BORROWED:
                 returnStatus.setForeground(Color.RED);
@@ -195,14 +216,61 @@ public class BorrowPanel extends JPanel {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private void clearBorrowFields() {
-        borrowUserField.setText("");
-        borrowItemField.setText("");
+    /**
+     * Populates dropdown menus with current users and items from the database.
+     */
+    private void populateDropdowns() {
+        userIdMap.clear();
+        itemIdMap.clear();
+        returnUserIdMap.clear();
+        returnItemIdMap.clear();
+
+        borrowUserCombo.removeAllItems();
+        borrowItemCombo.removeAllItems();
+        returnUserCombo.removeAllItems();
+        returnItemCombo.removeAllItems();
+
+        // Add placeholder options
+        borrowUserCombo.addItem("-- Select Borrower --");
+        borrowItemCombo.addItem("-- Select Item --");
+        returnUserCombo.addItem("-- Select Borrower --");
+        returnItemCombo.addItem("-- Select Item --");
+
+        // Populate users
+        List<UserAccount> users = manager.getAllUsers();
+        for (UserAccount user : users) {
+            String name = user.getName();
+            String id = user.getUserID();
+            userIdMap.put(name, id);
+            returnUserIdMap.put(name, id);
+            borrowUserCombo.addItem(name);
+            returnUserCombo.addItem(name);
+        }
+
+        // Populate items
+        List<LibraryItem> items = manager.getAllItems();
+        for (LibraryItem item : items) {
+            String title = item.getTitle();
+            String id = item.getItemID();
+            itemIdMap.put(title, id);
+            returnItemIdMap.put(title, id);
+            borrowItemCombo.addItem(title);
+            returnItemCombo.addItem(title);
+        }
     }
 
-    private void clearReturnFields() {
-        returnUserField.setText("");
-        returnItemField.setText("");
+    /**
+     * Refreshes dropdowns after borrow/return operations.
+     */
+    private void refreshDropdowns() {
+        // Reset to first option
+        borrowUserCombo.setSelectedIndex(0);
+        borrowItemCombo.setSelectedIndex(0);
+        returnUserCombo.setSelectedIndex(0);
+        returnItemCombo.setSelectedIndex(0);
+        
+        // Repopulate with latest data
+        populateDropdowns();
     }
 
     private void showError(String msg) {
@@ -210,12 +278,12 @@ public class BorrowPanel extends JPanel {
     }
 
     private void addFormRow(JPanel panel, GridBagConstraints g,
-                            int row, String label, JTextField field, String tooltip) {
+                            int row, String label, JComboBox<String> combo, String tooltip) {
         g.gridx = 0; g.gridy = row; g.gridwidth = 1; g.weightx = 0;
         panel.add(new JLabel(label), g);
         g.gridx = 1; g.weightx = 1;
-        field.setToolTipText(tooltip);
-        panel.add(field, g);
+        combo.setToolTipText(tooltip);
+        panel.add(combo, g);
     }
 
     private GridBagConstraints formGbc() {
